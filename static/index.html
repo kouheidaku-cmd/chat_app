@@ -85,6 +85,15 @@
             border-radius: 0 5px 5px 0;
             cursor: pointer;
         }
+        /* style.css 等に追加 */
+        #mute-button {
+            background-color: #4caf50; /* ONの時は緑 */
+            color: white;
+        }
+
+        #mute-button.muted {
+            background-color: #f44336; /* OFFの時は赤 */
+        }
     </style>
 </head>
 <body>
@@ -104,6 +113,7 @@
             <div id="input-area">
                 <input type="text" id="chat-input" onkeypress="enterKeyPress(event)" placeholder="メッセージを入力...">
                 <button id="send-button" type="button">送信</button>
+                <button id="mute-button" onclick="muteButtonPress()">マイクOFF</button>
             </div>
         </div>
     </div>
