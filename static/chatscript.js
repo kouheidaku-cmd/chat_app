@@ -109,14 +109,21 @@ function muteButtonPress(){
 
 //------お助けボタン------
 function requestHelp(){
+    const hintDisplay=document.getElementById("hint-display");
+    const hintText=document.getElementById("hint-text");
+    
+    // もし今表示されているなら、非表示にして関数を抜ける
+    if (hintDisplay.style.display === "block") {
+        hintDisplay.style.display = "none";
+        return;
+    }
+
     const data={
         type:"help_request",
         value:null
     };
     socket.send(JSON.stringify(data));
 
-    const hintDisplay=document.getElementById("hint-display");
-    const hintText=document.getElementById("hint-text");
     hintDisplay.style.display = "block";
     hintText.innerText = "考え中...";
 }
