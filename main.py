@@ -43,6 +43,14 @@ async def websocket_endpoint(websocket: WebSocket):
                     "reply": response["reply"],
                     "ai_emotion": response["ai_emotion"]
                 })
+            elif data["type"]=="undo":
+                chat_service.undo_last()
+            elif data["type"] == "help_request":
+                hint_text = chat_service.get_hint()
+                await websocket.send_json({
+                    "status": "hint_response",
+                    "hint": hint_text
+                })
     except Exception as e:
         print(f"Connection closed: {e}")
 

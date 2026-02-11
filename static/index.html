@@ -5,13 +5,12 @@
     <title>リアルタイム表情分析</title>
     <style>
         #video-container { position: relative; width: 400px; }
-        video { width: 100%; border-radius: 10px; }
         #emotion-display { font-size: 24px; font-weight: bold; color: #ff4b4b; margin-top: 10px; }
         #video-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            height: 500px;
+            max-width: 100%;
+            height: 300px;
             margin: 0 auto;
             background-color: #000;
             overflow: hidden;
@@ -40,7 +39,7 @@
             bottom: 20px;
             left: 20px;
             width: 300px;
-            height: 250px; /* 少し高さを広げると見やすいです */
+            height: 200px; /* 少し高さを広げると見やすいです */
             display: flex;
             flex-direction: column;
             pointer-events: none; /* 親はクリックを通す（背後の映像操作のため） */
@@ -97,25 +96,34 @@
     </style>
 </head>
 <body>
-    <h2>AI表情分析チャット (リアルタイム版)</h2>
-
     <div id="video-container">
-
         <!--AIキャラクターの見た目-->
         <div id="ai-video-container" style="text-align:center; margin-bottom:20px;">
             <img id="ai-face" src="static/character/neutral.png" width="300" style="border-radius: 20px; border: 5px solid #ccc;"/>
             <div id="ai-status">AIの状態: 待機中</div>
         </div>
+    </div>
 
-        <!--チャット画面-->
-        <div id="chat-overlay">
-            <div id="chat-log"></div>
-            <div id="input-area">
-                <input type="text" id="chat-input" onkeypress="enterKeyPress(event)" placeholder="メッセージを入力...">
-                <button id="send-button" type="button">送信</button>
-                <button id="mute-button" onclick="muteButtonPress()">マイクOFF</button>
-            </div>
+    <!--チャット画面-->
+    <div id="chat-overlay">
+        <div id="chat-log"></div>
+        <div id="input-area">
+            <input type="text" id="chat-input" onkeypress="enterKeyPress(event)" placeholder="メッセージを入力...">
+            <button id="send-button" type="button">送信</button>
         </div>
+    </div>
+
+    <div class="controls">
+        <label for="speed-range">話すスピード: <span id="speed-value">1.0</span>x</label>
+        <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="1.0">
+        <button id="mute-button" onclick="muteButtonPress()">マイクOFF</button>
+        <button id="back-button" onclick="undoLastMessage()">一つ前に戻る</button>
+        <button id="repeat-button" onclick="repeatLastAIResponse()">もう一度聞く</button>
+    </div>
+
+    <button id="help-button" onclick="requestHelp()">💡 ヒント</button>
+    <div id="hint-display" style="display:none; color: #555; font-style: italic; margin-top: 5px;">
+        ヒント: <span id="hint-text"></span>
     </div>
 
 

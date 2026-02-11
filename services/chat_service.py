@@ -38,3 +38,26 @@ class ChatService:
             self.chat_history = [self.chat_history[0]] + self.chat_history[-10:]
 
         return response_json
+    
+    def undo_last(self):
+        if len(self.chat_history)>2:
+            self.chat_history.pop()
+            self.chat_history.pop()
+            print("サーバ側の履歴一往復削除")
+
+    def get_hint(self):
+        # ヒント生成用の短いプロンプトを作成
+        hint_prompt = (
+            "これまでの会話の流れを踏まえて、role:userが次に言える短いフレーズを3つ提案してください。"
+            "1. [フレーズ] \n2. [フレーズ] ..."
+        )
+        
+        # 履歴を壊さないように、コピーしたメッセージにヒント用プロンプトを足して送る
+        temp_messages = self.chat_history + [{"role": "system", "content": hint_prompt}]
+        
+        response = self.client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=temp_messages
+        )
+        
+        return response.choices[0].message.content
