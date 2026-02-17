@@ -75,6 +75,15 @@ async def websocket_endpoint(websocket: WebSocket):
                     "status": "hint_response",
                     "hint": hint_text
                 })
+            #途中終了の処理
+            elif data["type"]=="request_feedback":
+                report_text=chat_service.get_report()
+
+                await websocket.send_json({
+                    "status": "talk_finish",
+                    "session_status": "end_by_user", # ユーザーによる終了
+                    "report": report_text
+                })
 
     except Exception as e:
         print(f"Connection closed: {e}")

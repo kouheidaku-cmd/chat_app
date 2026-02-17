@@ -65,6 +65,7 @@ class ChatService:
                 # 画面表示用に [SESSION_END] の文字だけ消しておく
                 #response_json["reply"] = response_json["reply"].replace("[SESSION_END]", "").strip()
                 print(self.status)
+                print(self.chat_history)
             if len(self.chat_history)>=self.max_history:
                 self.status="end_by_limit"
         #インスタンスの状態もjsonデータに加える
@@ -95,17 +96,29 @@ class ChatService:
         return response.choices[0].message.content
     
     def get_report(self):
-        # ヒント生成用の短いプロンプトを作成
-        hint_prompt = (
-            "role:userは言語の学習者です"
-            f"role:userはこのように設定されたsystemに対して課題に取り組んでいました。：{PROMPTS["ROLEPLAY_PROMPT"]}"
-            f"role:userとの会話の状態は最終的にこのようになりました{self.status}"
-            "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+        report_prompt=None
+        if self.mode=="freetalk":
+            #レポート生成用のプロンプトを渡す
+            report_prompt = (
+                "role:userは言語の学習者です"
+                "role:userの対話相手はrole:assistantです"
+                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+                "userからのメッセージに返信する必要性はありません"
+            )
 
-        )
-        
-        temp_messages = self.chat_history + [{"role": "system", "content": hint_prompt}]
-        
+        if self.mode=="roleplay":
+            #レポート生成用のプロンプトを渡す
+            report_prompt = (
+                "role:userは言語の学習者です"
+                f"role:userとの対話相手であるrole:assistantは以下のようなプロンプトで設定されていました：{PROMPTS["ROLEPLAY_PROMPT"]}"
+                f"role:userとの会話の状態は最終的にこのような状態で終了しました。status:{self.status}  ただし各statusはそれぞれ以下の意味です。active:ユーザ側で会話が途中終了されました。　end_by_ai:ユーザが課題を解決しました　end_by_limit:ユーザは指定の回数以内の会話で課題を解決できませんでした"
+                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+
+            )
+            
+        #システムプロンプトは除外
+        temp_messages = self.chat_history[1:] + [{"role": "system", "content": report_prompt}]
+            
         response = self.client.chat.completions.create(
             model=MODEL_NAME,
             messages=temp_messages

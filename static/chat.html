@@ -152,7 +152,7 @@
         #mute-button { background-color: #4caf50; color: white; }
         #mute-button.muted { background-color: #f44336; }
         #help-button { background-color: #fff3cd; color: #856404; }
-
+        #finish-button {grid-column: span 4; background-color: #f8d7da; color: #721c24; margin-top: 5px;}
         /* スライダーエリア */
         .speed-control {
             grid-column: span 4;
@@ -211,6 +211,7 @@
                 <button id="back-button" class="btn-action" onclick="undoLastMessage()">🔙 戻る</button>
                 <button id="repeat-button" class="btn-action" onclick="repeatLastAIResponse()">🔁 聞く</button>
                 <button id="help-button" class="btn-action" onclick="requestHelp()">💡 ヒント</button>
+                <button id="finish-button" class="btn-action" onclick="forceFinish()">🏁 会話を終了してレポートを表示</button>
                 
                 <div class="speed-control">
                     <span>速さ: <span id="speed-value">1.0</span>x</span>
