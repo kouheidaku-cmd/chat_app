@@ -8,6 +8,7 @@ const aiStatus=document.getElementById("ai-status");//aiの感情
 const speedRange = document.getElementById("speed-range");
 const speedValue = document.getElementById("speed-value");
 
+
 //AIの表情画像のパス管理
 let currentEmotionImg="/static/character/neutral.png";//グローバル変数でAIの感情画像を保持
 let currentEmotionImg2="/static/character/neutral-2.png";

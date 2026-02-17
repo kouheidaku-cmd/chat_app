@@ -13,6 +13,12 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MODEL_NAME = "gpt-4o-mini" 
 
 #システムプロンプト
-with open(PROJECT_ROOT/"static/character/ai_profile.txt","r",encoding="utf-8") as f:
-    AI_SYSTEM_PROMPT=f.read()
+PROMPT_DIR = PROJECT_ROOT / "static/character"
+PROMPTS = {}
 
+# 指定したフォルダ内の .txt ファイルを自動スキャン
+for txt_file in PROMPT_DIR.glob("*.txt"):
+    # ファイル名（拡張子なし）をキーにして読み込む
+    # 例: ROLEPLAY_PROMPT.txt -> PROMPTS["ROLEPLAY_PROMPT"]
+    with open(txt_file, "r", encoding="utf-8") as f:
+        PROMPTS[txt_file.stem] = f.read()

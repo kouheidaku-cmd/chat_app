@@ -14,6 +14,9 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #インスタンス化
 chat_service=ChatService()
 
+#roleの選択
+chat_service.set_mode("roleplay")
+
 #------以下ルーティング------
 @app.get("/")
 async def get():
