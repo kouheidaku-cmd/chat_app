@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI英会話アプリ</title>
+    <style>
+        /* スマホ向けベースレイアウト */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /*切り替え用の非表示クラス*/
+        .hidden{
+            display:none !important;
+        }
+
+        /*-----チャット画面用スタイル------*/
+        #chat-section{
+            display:flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        /* キャラクター表示エリア（上半分） */
+        #ai-video-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #e0eafc, #cfdef3);
+            position: relative;
+            min-height: 250px;
+        }
+
+        #ai-face {
+            width: 70%;
+            max-width: 280px;
+            height: auto;
+            border-radius: 20px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            transition: transform 0.2s;
+        }
+
+        #ai-status {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        /* ヒント表示（キャラの足元にふわっと出す） */
+        #hint-display {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 18px;
+            border-radius: 20px;
+            width: 85%;
+            font-size: 13px;
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 20;
+            border: 1px solid #ddd;
+        }
+
+        /* 操作・チャットエリア（下半分） */
+        #interaction-container {
+            background: white;
+            border-radius: 30px 30px 0 0;
+            padding: 20px;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 30;
+        }
+
+        #chat-log {
+            height: 120px;
+            overflow-y: auto;
+            border-radius: 15px;
+            background: #f8f9fa;
+            padding: 12px;
+            border: 1px solid #eee;
+            font-size: 14px;
+            list-style: none; /* liの点を消す */
+            margin: 0;
+        }
+
+        /* 入力エリア */
+        #input-area {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #chat-input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px; /* iPhoneでのズーム防止 */
+            outline: none;
+            background: #fdfdfd;
+        }
+
+        #send-button {
+            border: none;
+            background: #007bff;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* 各種ボタンのグリッド配置 */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 10px 5px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eee;
+            color: #444;
+            transition: 0.1s;
+        }
+
+        .btn-action:active { transform: scale(0.95); }
+
+        #mute-button { background-color: #4caf50; color: white; }
+        #mute-button.muted { background-color: #f44336; }
+        #help-button { background-color: #fff3cd; color: #856404; }
+
+        /* スライダーエリア */
+        .speed-control {
+            grid-column: span 4;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        #speed-range { flex: 1; }
+
+        /* --- レポート画面用スタイル --- */
+        #report-section {
+            background: white;
+            margin: 20px;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            max-height: 85vh;
+        }
+
+        #report-text {
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-section">
+        <div id="ai-video-container">
+            <div id="ai-status">AIの状態: 待機中</div>
+            
+            <img id="ai-face" src="static/character/neutral.png"/>
+            
+            <div id="hint-display">
+                💡 <span id="hint-text"></span>
+            </div>
+        </div>
+
+        <div id="interaction-container">
+            <ul id="chat-log"></ul>
+            
+            <div id="input-area">
+                <input type="text" id="chat-input" onkeypress="enterKeyPress(event)" placeholder="話しかけてみて...">
+                <button id="send-button" type="button">送信</button>
+            </div>
+
+            <div class="controls-grid">
+                <button id="mute-button" class="btn-action" onclick="muteButtonPress()">🔇 マイクOFF</button>
+                <button id="back-button" class="btn-action" onclick="undoLastMessage()">🔙 戻る</button>
+                <button id="repeat-button" class="btn-action" onclick="repeatLastAIResponse()">🔁 聞く</button>
+                <button id="help-button" class="btn-action" onclick="requestHelp()">💡 ヒント</button>
+                
+                <div class="speed-control">
+                    <span>速さ: <span id="speed-value">1.0</span>x</span>
+                    <input type="range" id="speed-range" min="0.5" max="2.0" step="0.1" value="1.0">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="report-section" class="hidden">
+        <h2 style="color: #007bff; text-align: center; margin-top: 0;">🏆 Session Report</h2>
+        <div id="report-text">レポートを生成しています...</div>
+        <button onclick="window.location.href='/'" style="width: 100%; padding: 15px; margin-top: 25px; background: #007bff; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; font-size: 16px;">
+            スタート画面に戻る
+        </button>
+    </div>
+
+    <script src="chatscript.js"></script>
+</body>
+</html>

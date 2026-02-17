@@ -67,7 +67,8 @@ class ChatService:
                 print(self.status)
             if len(self.chat_history)>=self.max_history:
                 self.status="end_by_limit"
-
+        #インスタンスの状態もjsonデータに加える
+        response_json["session_status"]=self.status
         return response_json
     
     def undo_last(self):
@@ -84,6 +85,25 @@ class ChatService:
         )
         
         # 履歴を壊さないように、コピーしたメッセージにヒント用プロンプトを足して送る
+        temp_messages = self.chat_history + [{"role": "system", "content": hint_prompt}]
+        
+        response = self.client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=temp_messages
+        )
+        
+        return response.choices[0].message.content
+    
+    def get_report(self):
+        # ヒント生成用の短いプロンプトを作成
+        hint_prompt = (
+            "role:userは言語の学習者です"
+            f"role:userはこのように設定されたsystemに対して課題に取り組んでいました。：{PROMPTS["ROLEPLAY_PROMPT"]}"
+            f"role:userとの会話の状態は最終的にこのようになりました{self.status}"
+            "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+
+        )
+        
         temp_messages = self.chat_history + [{"role": "system", "content": hint_prompt}]
         
         response = self.client.chat.completions.create(

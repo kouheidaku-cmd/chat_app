@@ -14,13 +14,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #インスタンス化
 chat_service=ChatService()
 
-#roleの選択
-chat_service.set_mode("roleplay")
-
 #------以下ルーティング------
 @app.get("/")
-async def get():
+async def get_index():
     return FileResponse('static/index.html')
+
+@app.get("/chat")
+async def get_chat():
+    return FileResponse('static/chat.html')
 
 @app.get("/chatscript.js")
 async def get_js():
@@ -36,6 +37,13 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             # クライアント(ユーザ側)からテキスト（JSON形式）を受信
             data = await websocket.receive_json()
+
+            #roleの選択
+            if data["type"]=="mode_change":
+                chat_service.set_mode(data["value"])
+
+            
+            #通常のチャット処理
             if data["type"] == "chat":
                 # AIから返答を取得
                 response = chat_service.get_response(data["value"])
@@ -44,16 +52,30 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_json({
                     "status": "chat_response",
                     "reply": response["reply"],
-                    "ai_emotion": response["ai_emotion"]
+                    "ai_emotion": response["ai_emotion"],
+                    "session_status":response["session_status"]
                 })
+                #chat終了の処理
+                if response["session_status"]!="active":
+                    print("レポート作成します")
+                    report_text=chat_service.get_report()
+                    # クライアントへ返信
+                    await websocket.send_json({
+                        "status": "talk_finish",
+                        "session_status": response["session_status"],
+                        "report":report_text
+                    })
+            #一つ前に戻る処理
             elif data["type"]=="undo":
                 chat_service.undo_last()
+            #ヒントの処理
             elif data["type"] == "help_request":
                 hint_text = chat_service.get_hint()
                 await websocket.send_json({
                     "status": "hint_response",
                     "hint": hint_text
                 })
+
     except Exception as e:
         print(f"Connection closed: {e}")
 
