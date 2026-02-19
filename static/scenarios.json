@@ -1,0 +1,27 @@
+{
+  "cafe": {
+    "title": "カフェで注文",
+    "description": "店員さんに飲み物を注文してみよう。",
+    "icon": "☕",
+    "character":"hikari",
+    "prompt_key": "ROLEPLAY_CAFE",
+    "finish_conditions":"CAFE_FINISH_CONDITIONS",
+    "initial_message": "いらっしゃいませ、何か御用ですか？"
+  },
+  "airport": {
+    "title": "空港のチェックイン",
+    "description": "カウンターで搭乗手続きをスムーズに行おう。",
+    "icon": "✈️",
+    "prompt_key": "ROLEPLAY_AIRPORT",
+    "initial_message": "Next, please. May I see your passport and ticket?"
+  },
+  "freetalk": {
+    "title": "フリートーク",
+    "description": "トピックを決めずに自由に話しましょう。",
+    "icon": "💬",
+    "character":"hikari",
+    "prompt_key": "FREETALK_PROMPT",
+    "finish_conditions":"FREETALK_FINISH_CONDITIONS",
+    "initial_message": "Hello! What would you like to talk about today?"
+  }
+}

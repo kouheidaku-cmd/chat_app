@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles 
 from services.chat_service import ChatService
 import uvicorn#こいつがサーバ
+import json
 
 
 #fastapiインスタンスはいろんなファイルをつなぐルーティングを行う、ちなみにサーバではない
@@ -40,11 +41,16 @@ async def websocket_endpoint(websocket: WebSocket):
 
             #roleの選択
             if data["type"]=="mode_change":
-                chat_service.set_mode(data["value"])
+                #フロントエンドから送られてきたモードの選択結果によって必要な情報を取得し再度送り返す
+                init_data=chat_service.set_mode(data["value"])
+                init_data["status"]="init_response"
+
+                await websocket.send_json(init_data)
 
             
             #通常のチャット処理
             if data["type"] == "chat":
+                print(data)
                 # AIから返答を取得
                 response = chat_service.get_response(data["value"])
                 print(response)

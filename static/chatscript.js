@@ -10,9 +10,10 @@ const speedValue = document.getElementById("speed-value");
 
 
 //AIの表情画像のパス管理
-let currentEmotionImg="/static/character/neutral.png";//グローバル変数でAIの感情画像を保持
-let currentEmotionImg2="/static/character/neutral-2.png";
-let currentEmotionImg3="/static/character/neutral-3.png";
+let character=null;
+let currentEmotionImg=null;
+let currentEmotionImg2=null;
+let currentEmotionImg3=null;
 
 let mouthInterval=null;//口パクの状態を管理する変数
 let speak_frag=0;//発話のフラッグ
@@ -26,9 +27,6 @@ const socket = new WebSocket('ws://localhost:8000/ws/chat');
 
 //ファイルを読み込んだ時の処理
 window.onload = () => {
-    //瞬きの開始
-    startBlinking();
-
     //モードの情報の取得と送信
     const urlParams = new URLSearchParams(window.location.search);
     const selectedMode = urlParams.get('mode') || 'freetalk'; // デフォルトはフリートーク
@@ -46,6 +44,28 @@ window.onload = () => {
 //socketがつながってる間の処理
 socket.onmessage = (event) => {//サーバーからメッセージを受信したときの処理
     const data = JSON.parse(event.data);
+    console.log("サーバーからのデータ:", data);
+
+    if (data.status==="init_response"){
+        console.log("顔画像準備")
+        const initialmsg=data.initial_message;
+        character=data.character;
+        currentEmotionImg=`/static/character/${character}/neutral.png`;
+        currentEmotionImg2=`/static/character/${character}/neutral-2.png`;
+        currentEmotionImg3=`/static/character/${character}/neutral-3.png`;
+        console.log("顔画像準備完了")
+        
+        //瞬きの開始
+        startBlinking();
+        
+        //最初のメッセージの処理
+        speak(initialmsg);
+        const li = document.createElement("li");//新しいリストアイテム要素を作成
+        li.style.marginBottom="10px";//リストアイテムの下に余白を追加
+        li.innerHTML=`<strong>AI:</strong> ${initialmsg}`;//リストアイテムの内容を設定
+        chatLog.appendChild(li);
+        
+    }
 
     if (data.status==="chat_response"){//サーバーからAIの返答を受信したときの処理
         lastAiResponse=data.reply
@@ -90,9 +110,9 @@ function updateAiFace(ai_emotion){
         "恐れ": "fearful",
         "自然体":"neutral"
     };
-    currentEmotionImg = `/static/character/${emotions[ai_emotion]}.png`;
-    currentEmotionImg2 = `/static/character/${emotions[ai_emotion]}-2.png`;
-    currentEmotionImg3 = `/static/character/${emotions[ai_emotion]}-3.png`;
+    currentEmotionImg = `/static/character/${character}/${emotions[ai_emotion]}.png`;
+    currentEmotionImg2 = `/static/character/${character}/${emotions[ai_emotion]}-2.png`;
+    currentEmotionImg3 = `/static/character/${character}/${emotions[ai_emotion]}-3.png`;
 
     aiFace.src=currentEmotionImg
     aiStatus.innerText=`AIの状態:${ai_emotion}`
