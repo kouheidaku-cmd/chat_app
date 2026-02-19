@@ -30,6 +30,7 @@ class ChatService:
             finish_key=config.get("finish_conditions")
             initial_message_text=config.get("initial_message")
             character_name=config.get("character")
+            background_image=config.get("background")
         else:
             print("エラー：シナリオが存在しません")
 
@@ -51,7 +52,8 @@ class ChatService:
         send_data={
             "mode_name":f"{mode_name}",
             "character":f"{character_name}",
-            "initial_message":f"{initial_message_text}"
+            "initial_message":f"{initial_message_text}",
+            "background":f"{background_image}"
         }
         return send_data
 
@@ -108,6 +110,7 @@ class ChatService:
                 self.status="end_by_limit"
         #インスタンスの状態もjsonデータに加える
         response_json["session_status"]=self.status
+        print(f"status:{self.status}")
         return response_json
     
     def undo_last(self):

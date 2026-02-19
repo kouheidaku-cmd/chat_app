@@ -2,6 +2,7 @@
   "cafe": {
     "title": "カフェで注文",
     "description": "店員さんに飲み物を注文してみよう。",
+    "background":"cafe_background.jpg",
     "icon": "☕",
     "character":"hikari",
     "prompt_key": "ROLEPLAY_CAFE",
@@ -18,6 +19,7 @@
   "freetalk": {
     "title": "フリートーク",
     "description": "トピックを決めずに自由に話しましょう。",
+    "background":"freetalk_background.jpg",
     "icon": "💬",
     "character":"hikari",
     "prompt_key": "FREETALK_PROMPT",
