@@ -1,24 +1,90 @@
 #----------------プログラム全体を管理するサーバプログラム-----------
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket,Depends, HTTPException,status,Form
 from fastapi.responses import FileResponse 
 from fastapi.staticfiles import StaticFiles 
 from services.chat_service import ChatService
 import uvicorn#こいつがサーバ
 import json
+import models
+from database import engine,SessionLocal
+from sqlalchemy.orm import Session
+from typing import List
+from auth import get_password_hash,verify_password
+
+#DBの作成、接続
+#サーバ起動時にDBがあるかどうかの確認、もしない場合はtest.dbを作成
+models.Base.metadata.create_all(bind=engine)
+
+#APIが呼ばれるたびに新しいDB接続(セッション)を作り処理が終わったらfinallyでdbを閉じる関数
+def get_db():
+    db=SessionLocal()
+    try:
+        yield db#yieldは全部値を返すreturnとは異なり関数内で値を一つずつ一時停止して返す
+    finally:
+        db.close()
+
 
 
 #fastapiインスタンスはいろんなファイルをつなぐルーティングを行う、ちなみにサーバではない
+#Web APIを作るためのフレームワーク
 app = FastAPI()
 #フロントエンド部分をユーザ側に公開、これをしないと画像とかにアクセスできなくなる
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 #インスタンス化
 chat_service=ChatService()
 
 #------以下ルーティング------
-@app.get("/")
-async def get_index():
-    return FileResponse('static/index.html')
+#---DB関連-----
+#ログイン画面の表示
+@app.get("/login")
+async def get_login():
+    return FileResponse('static/login.html')
+
+#usernameとsessionを渡してログインを行う関数
+@app.post("/login")
+def login(username: str = Form(...), password: str = Form(...),db: Session = Depends(get_db)):#Form(...)で引数がHTTPリクエストのBODYのフォームデータとして送られてきていると宣言
+    # DBからユーザーを探す
+    user = db.query(models.User).filter(models.User.username == username).first()
+    
+    if not user or not verify_password(password,user.hashed_password):
+        #raise:実行された瞬間に関数の処理が中断 HTTPException:ブラウザにHTTPエラーを返す
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="ユーザー名またはパスワードが正しくありません"
+        )
+    #成功
+    return {"message":"ログイン成功","username":user.username}
+
+#usernameとsessionを渡してサインアップを行う関数
+@app.post("/signup")
+def sinup(username: str = Form(...), password: str = Form(...),db: Session = Depends(get_db)):#Form(...)で引数がHTTPリクエストのBODYのフォームデータとして送られてきていると宣言
+    # DBからユーザーを探す
+    exising_user = db.query(models.User).filter(models.User.username == username).first()
+    print(f"DEBUG: password type is {type(password)}")
+    if exising_user :
+        #raise:実行された瞬間に関数の処理が中断 HTTPException:ブラウザにHTTPエラーを返す
+        raise HTTPException(
+            status_code=400,detail="このユーザ名は既に使用されています"
+        )
+    
+    #成功
+    #新しいパスワードをハッシュ化して保存
+    new_user=models.User(
+        username=username,
+        hashed_password=get_password_hash(password)
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"message":"ユーザ登録が完了しました"}
+
+#------DB関連終了--------
+
+@app.get("/home")
+async def get_home():
+    return FileResponse('static/home.html')
 
 @app.get("/chat")
 async def get_chat():

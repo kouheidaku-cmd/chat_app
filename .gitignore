@@ -1,7 +1,5 @@
 # 仮想環境（絶対にあげてはいけない）
-.venv/
-venv/
-ENV/
+.chatvenv/
 .env/
 
 # Pythonのキャッシュ
