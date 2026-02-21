@@ -91,6 +91,8 @@
     <div id="main-menu" class="container">
         <h1>AI英会話へようこそ</h1>
 
+        <div id="name-area"></div>
+
         <div class="mode-card" onclick="startChat('freetalk')">
             <div class="mode-icon">💬</div>
             <div class="mode-title">フリートーク</div>
@@ -166,6 +168,19 @@
                 scenarioList.appendChild(card);
             });
         }
+
+        window.onload = function() {
+            // localStorage.getItem('保存した時の名前')
+            const storedName = localStorage.getItem('user_name');
+            
+            if (storedName) {
+                // 画面上の要素（例：<span id="name-area">）に表示させる
+                document.getElementById('name-area').innerText = storedName;
+            } else {
+                // もしデータがなければ、未ログインなのでログイン画面へ追い返す
+                window.location.href = "/login";
+            }
+        };
     </script>
 
 </body>

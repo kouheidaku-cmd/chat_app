@@ -24,6 +24,10 @@ async function login() {
     //成功の時
     if (response.ok) {
         const data=await response.json();
+
+        //今回はログイン管理をセッションではなくローカルストレージ（クライアント側のブラウザ）に保存
+        localStorage.setItem('user_name', data.username);
+
         console.log("ログイン成功"+data.username);
         window.location.href="/home";
     }else{
@@ -55,6 +59,9 @@ async function signup() {
     if (response.ok) {
         const data=await response.json();
         console.log("サインアップ完了"+data.username);
+
+        // localStorage.setItem('好きな名前', 保存したい値)
+        localStorage.setItem('user_name', data.username);
         window.location.href="/home";
     }else{
         alert("すでにそのユーザネームは登録されています");
