@@ -38,7 +38,7 @@ chat_service=ChatService()
 #------以下ルーティング------
 #---DB関連-----
 #ログイン画面の表示
-@app.get("/login")
+@app.get("/")
 async def get_login():
     return FileResponse('static/login.html')
 
@@ -85,6 +85,26 @@ def sinup(username: str = Form(...), password: str = Form(...),db: Session = Dep
 @app.get("/home")
 async def get_home():
     return FileResponse('static/home.html')
+
+@app.get("/profile")
+async def get_profile():
+    return FileResponse('static/profile.html')
+
+@app.post("/getuserdata")
+def sinup(username: str = Form(...),db: Session = Depends(get_db)):#Form(...)で引数がHTTPリクエストのBODYのフォームデータとして送られてきていると宣言
+    # DBからユーザーを探す
+    user = db.query(models.User).filter(models.User.username == username).first()
+    if not user :
+        #raise:実行された瞬間に関数の処理が中断 HTTPException:ブラウザにHTTPエラーを返す
+        raise HTTPException(
+            status_code=404,detail="ユーザーがデータベース上で見つけられませんでした"
+        )
+    
+    #FASTAPIにおける関数の戻り値はデフォルトでjson
+    return{
+        "username":user.username,
+        "created_at":user.created_at.strftime("%Y-%m-%d %H:%M:%S") if user.created_at else "不明"
+    }
 
 @app.get("/chat")
 async def get_chat():

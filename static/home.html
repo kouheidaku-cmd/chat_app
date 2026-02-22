@@ -104,6 +104,14 @@
             <div class="mode-title">ロールプレイ</div>
             <div class="mode-desc">様々な場面での実戦的な英会話力を身につけましょう。</div>
         </div>
+
+        <button onclick="checkprofile()" style="width: 100%";padding: 15px;margin-top: 10px;background:#6c757d; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold;">
+            👤 あなたの情報
+        </button>
+
+        <button onclick="logout()" style="width: 100%";padding: 15px;margin-top: 10px;background:#6c757d; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold;">
+            🔚 ログアウト
+        </button>
     </div>
 
     <div id="roleplay-menu" class="container hidden"><!--これはcontainerとhiddenの二つのクラスを持つ-->
@@ -118,70 +126,7 @@
         </button>
     </div>
 
-    <script>
-        function dofreetalk() {
-            // chat.htmlにモード情報を付けて遷移
-            window.location.href = `/chat?mode=freetalk`;
-        }
-        function showRoleplaySelect(){
-            document.getElementById("main-menu").classList.add("hidden");//画面の切り替えは要はクラスの付け替え
-            document.getElementById("roleplay-menu").classList.remove("hidden");
-            loadScenarios()
-        }
-        function showMainMenu(){
-            document.getElementById("main-menu").classList.remove("hidden");
-            document.getElementById("roleplay-menu").classList.add("hidden");
-        }
-        function startChat(mode){
-            window.location.href=`chat?mode=${mode}`;
-        }
-        async function loadScenarios() {
-            // 1. JSONファイルを読み込む
-            const response = await fetch('/static/scenarios.json');
-            const scenarios = await response.json();
-            
-            // 2. ボタンを並べたい場所（親要素）を取得
-            const scenarioList = document.getElementById('scenario-list');
-            scenarioList.innerHTML = ''; // 中身を一度空にする
-
-            // 3. JSONのデータ分だけループを回す
-            Object.keys(scenarios).forEach(key => {
-                const item = scenarios[key];
-
-                // 4. 新しい div (mode-card) を作成
-                const card = document.createElement('div');
-                card.className = 'mode-card';
-                
-                // 5. クリックした時の動作を設定
-                card.onclick = () => {
-                    startChat(key)
-                };
-
-                // 6. カードの中身を組み立てる
-                card.innerHTML = `
-                    <div class="mode-icon">${item.icon}</div>
-                    <div class="mode-title">${item.title}</div>
-                    <div class="mode-desc">${item.description}</div>
-                `;
-
-                // 7. 親要素に追加する
-                scenarioList.appendChild(card);
-            });
-        }
-
-        window.onload = function() {
-            // localStorage.getItem('保存した時の名前')
-            const storedName = localStorage.getItem('user_name');
-            
-            if (storedName) {
-                // 画面上の要素（例：<span id="name-area">）に表示させる
-                document.getElementById('name-area').innerText = storedName;
-            } else {
-                // もしデータがなければ、未ログインなのでログイン画面へ追い返す
-                window.location.href = "/login";
-            }
-        };
-    </script>
+    <script src="/static/home.js"></script>
 
 </body>
 </html>
