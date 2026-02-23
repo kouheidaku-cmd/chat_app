@@ -75,6 +75,33 @@
             z-index: 10;
         }
 
+        #check-target {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #00ff51;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        #target-display {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 12px 18px;
+            border-radius: 20px;
+            width: 85%;
+            font-size: 13px;
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 30;
+            border: 1px solid #ddd;
+        }
+
         #loading-screen {
             position: absolute;
             top: 0;
@@ -132,7 +159,7 @@
             background: white;
             border-radius: 30px 30px 0 0;
             padding: 20px;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 -5px 15px #00ffff;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -241,6 +268,8 @@
         <div id="ai-video-container">
             <div id="ai-status">AIの状態: 待機中</div>
 
+            <button id="check-target" class="btn-action" onclick="CheckTarget()">タスクの確認</button>
+
             <div id="ai-background"></div>
 
             <div id="loading-screen">
@@ -289,6 +318,6 @@
         </button>
     </div>
 
-    <script src="chatscript.js"></script>
+    <script src="chatscript.js" defer></script>
 </body>
 </html>

@@ -31,6 +31,7 @@ class ChatService:
             initial_message_text=config.get("initial_message")
             character_name=config.get("character")
             background_image=config.get("background")
+            target=config.get("target")
         else:
             print("エラー：シナリオが存在しません")
 
@@ -53,7 +54,8 @@ class ChatService:
             "mode_name":f"{mode_name}",
             "character":f"{character_name}",
             "initial_message":f"{initial_message_text}",
-            "background":f"{background_image}"
+            "background":f"{background_image}",
+            "target":f"{target}"
         }
         return send_data
 

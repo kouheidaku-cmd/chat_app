@@ -7,6 +7,7 @@
     "character":"hikari",
     "prompt_key": "ROLEPLAY_CAFE",
     "finish_conditions":"CAFE_FINISH_CONDITIONS",
+    "target":"頼みたい飲み物の名前、サイズ、持ち帰りか店内かを店員さんに伝えよう！",
     "initial_message": "いらっしゃいませ、何か御用ですか？"
   },
   "airport": {
@@ -24,6 +25,7 @@
     "character":"hikari",
     "prompt_key": "FREETALK_PROMPT",
     "finish_conditions":"FREETALK_FINISH_CONDITIONS",
+    "target":"特になし",
     "initial_message": "Hello! What would you like to talk about today?"
   }
 }
