@@ -14,6 +14,10 @@ window.onload = function() {
     }
 };
 
+async function back(){
+    window.location.href = "/home";
+}
+
 
 async function GetUserData(storedName) {
     // FastAPIにPOST送信し取得したデータを伝える,fetchはブラウザがサーバーと通信するための機能、今までの通信はWebSocket作ってたから不要だった

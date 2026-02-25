@@ -32,13 +32,15 @@ window.onload = () => {
     //モードの情報の取得と送信
     const urlParams = new URLSearchParams(window.location.search);
     const selectedMode = urlParams.get('mode') || 'freetalk'; // デフォルトはフリートーク
+    const username=localStorage.getItem("user_name")//この時にusernameも送っちゃう
 
     // WebSocketがつながった後にモード切替命令を送る
     socket.onopen = () => {
         console.log("WebSocket接続成功 / モード:", selectedMode);
         socket.send(JSON.stringify({
             type: "mode_change",
-            value: selectedMode
+            value: selectedMode,
+            username:username
         }));
     };
 };

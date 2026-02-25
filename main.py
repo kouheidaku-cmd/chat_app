@@ -10,6 +10,7 @@ from database import engine,SessionLocal
 from sqlalchemy.orm import Session
 from typing import List
 from auth import get_password_hash,verify_password
+from datetime import datetime
 
 #DBの作成、接続
 #サーバ起動時にDBがあるかどうかの確認、もしない場合はtest.dbを作成
@@ -31,9 +32,6 @@ app = FastAPI()
 #フロントエンド部分をユーザ側に公開、これをしないと画像とかにアクセスできなくなる
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-#インスタンス化
-chat_service=ChatService()
 
 #------以下ルーティング------
 #---DB関連-----
@@ -118,6 +116,11 @@ async def get_js():
 @app.websocket("/ws/chat")
 async def websocket_endpoint(websocket: WebSocket):
 
+    #変数の設定、インスタンスの作成
+    chat_service=ChatService()
+    username=None
+    scenario_id=None
+
     await websocket.accept()
     print("Client connected")
     try:
@@ -130,6 +133,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 #フロントエンドから送られてきたモードの選択結果によって必要な情報を取得し再度送り返す
                 init_data=chat_service.set_mode(data["value"])
                 init_data["status"]="init_response"
+                username=data["username"]
+                scenario_id=data["value"]
+
+                print(f"サーバにusernameが伝わりました：{username}")
 
                 await websocket.send_json(init_data)
 
@@ -147,9 +154,48 @@ async def websocket_endpoint(websocket: WebSocket):
                     "ai_emotion": response["ai_emotion"],
                     "session_status":response["session_status"]
                 })
+
+                #-------データベースの更新関数-------
+                def save_data_to_db(username:str,scenario_id:str,status:str,db: Session):
+                    # DB上のuserを検索
+                    user=db.query(models.User).filter(
+                        models.User.username==username
+                    ).first()
+                    if not user:
+                        print(f"DB上にユーザー：{username}が見つかりませんでした")
+                    #useridの取得
+                    user_id=user.id
+                    
+                    #取得したuser_idとscinario_idから該当ユーザーの該当シナリオデータの検索
+                    progress=db.query(models.Progress).filter(
+                        models.Progress.user_id==user_id,
+                        models.Progress.scenario_id==scenario_id
+                    ).first()
+
+                    if progress:
+                        progress.play_count+=1
+                        progress.last_played_at=datetime.now()
+                        if status=="end_by_ai":
+                            progress.is_cleared=True
+                            progress.clear_count+=1
+                    else:
+                        new_progress=models.Progress(
+                            user_id=user_id,
+                            scenario_id=scenario_id,
+                            play_count=1,
+                            last_played_at=datetime.now()
+                        )
+                        if status=="end_by_ai":
+                            new_progress.is_cleared=True
+                            new_progress.clear_count=1
+                        db.add(new_progress)
+                    db.commit()
+                    print(f"DEBUG: {username} の進捗を更新しました (Scenario: {scenario_id})")
+
+                
                 #chat終了の処理
-                if response["session_status"]!="active":
-                    print("レポート作成します")
+                if response["session_status"]!="active":#ロールプレイが成功したとき
+                    print("ロールプレイ成功！レポート作成します")
                     report_text=chat_service.get_report()
                     # クライアントへ返信
                     await websocket.send_json({
@@ -157,6 +203,13 @@ async def websocket_endpoint(websocket: WebSocket):
                         "session_status": response["session_status"],
                         "report":report_text
                     })
+                    #DBの更新
+                    db=SessionLocal()
+                    save_data_to_db(username,scenario_id,response["session_status"],db)
+                    db.close()
+
+
+
             #一つ前に戻る処理
             elif data["type"]=="undo":
                 chat_service.undo_last()

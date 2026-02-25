@@ -11,10 +11,14 @@ class User(Base):#これはBaseクラスを継承している
     is_premium=Column(Boolean,default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-class Progress(Base):
+class Progress(Base):#userごとの各シナリオごとに行を作成
     __tablename__="progress"
     id=Column(Integer,primary_key=True)
     user_id=Column(Integer,ForeignKey("users.id"))#ForeignKey:外部キーを使ってusersテーブルのidと紐づけ
     scenario_id=Column(String)
     is_cleared=Column(Boolean,default=False)
+    play_count=Column(Integer,default=0)
+    last_played_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    clear_count=Column(Integer,default=0)
+
 
