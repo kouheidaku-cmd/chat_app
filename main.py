@@ -97,12 +97,26 @@ def sinup(username: str = Form(...),db: Session = Depends(get_db)):#Form(...)で
         raise HTTPException(
             status_code=404,detail="ユーザーがデータベース上で見つけられませんでした"
         )
-    
+
+    #取得したuserのidからそのユーザの前進捗データを取得
+    status=db.query(models.Progress).filter(models.Progress.user_id==user.id).all()
+    progress_list=[]
+    for s in status:
+        progress_list.append({
+            "scenario_id": s.scenario_id,
+            "play_count": s.play_count or 0,
+            "clear_count": s.clear_count or 0,
+            "is_cleared": s.is_cleared,
+            "last_played": s.last_played_at.strftime("%Y/%m/%d %H:%M") if s.last_played_at else "なし"
+        })
+
     #FASTAPIにおける関数の戻り値はデフォルトでjson
-    return{
+    return {
         "username":user.username,
-        "created_at":user.created_at.strftime("%Y-%m-%d %H:%M:%S") if user.created_at else "不明"
+        "created_at": user.created_at.strftime("%Y-%m-%d %H:%M:%S") if user.created_at else "不明",
+        "stats": progress_list  # リストを辞書の１つのキーに入れる
     }
+
 
 @app.get("/chat")
 async def get_chat():

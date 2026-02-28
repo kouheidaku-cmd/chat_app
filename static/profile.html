@@ -1,9 +1,58 @@
-<h1>ユーザ情報</h1>
-<p>現在のユーザー：<span id="name-area">読み込み中</span></p>
-<p id="created-at">読み込み中</p>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロフィール - 英会話アプリ</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        h2 { border-bottom: 2px solid #4CAF50; padding-bottom: 10px; color: #2c3e50; }
+        .user-info { margin-bottom: 30px; padding: 15px; background: #e8f5e9; border-radius: 8px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+        th { background-color: #4CAF50; color: white; }
+        tr:hover { background-color: #f1f1f1; }
+        
+        .btn-back { display: inline-block; margin-top: 25px; padding: 10px 20px; background-color: #607d8b; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; font-size: 16px; }
+        .btn-back:hover { background-color: #455a64; }
+        
+        /* 状態（クリア/挑戦中）のバッジスタイル */
+        .status-badge { font-weight: bold; font-size: 0.9em; }
+    </style>
+</head>
+<body>
 
-<button onclick="back()" style="width: 100%";padding: 15px;margin-top: 10px;background:#6c757d; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold;">
-    🔙 戻る
-</button>
+<div class="container">
+    <h2>プロフィール</h2>
+
+    <div class="user-info">
+        <p><strong>ユーザー名:</strong> <span id="name-area">取得中...</span></p>
+        <p id="created-at">登録日: --</p>
+    </div>
+
+    <h3>学習進捗</h3>
+    <table>
+        <thead>
+            <tr><!--trタグはテーブルの行（横一列）を定義する要素-->
+                <th>シナリオ</th><!--thタグはテーブルの各見出し-->
+                <th>プレイ回数</th>
+                <th>クリア回数</th>
+                <th>状態</th>
+                <th>最終プレイ</th>
+            </tr>
+        </thead>
+        <tbody id="stats-body">
+            <tr><td colspan="5">データを読み込み中...</td></tr>
+        </tbody>
+    </table>
+
+    <button class="btn-back" onclick="back()">← ホームに戻る</button>
+</div>
 
 <script src="/static/profile.js"></script>
+
+</body>
+</html>
