@@ -5,17 +5,32 @@
     "background":"cafe_background.jpg",
     "icon": "☕",
     "character":"hikari",
-    "prompt_key": "ROLEPLAY_CAFE",
+    "prompt_key": "CAFE_ROLEPLAY",
     "finish_conditions":"CAFE_FINISH_CONDITIONS",
     "target":"頼みたい飲み物の名前、サイズ、持ち帰りか店内かを店員さんに伝えよう！",
-    "initial_message": "いらっしゃいませ、何か御用ですか？"
+    "initial_message": "Hello, may I help you?"
   },
   "airport": {
     "title": "空港のチェックイン",
     "description": "カウンターで搭乗手続きをスムーズに行おう。",
+    "background":"airport_background.jpg",
     "icon": "✈️",
-    "prompt_key": "ROLEPLAY_AIRPORT",
+    "character":"hikari",
+    "prompt_key": "AIRPORT_ROLEPLAY",
+    "finish_conditions":"AIRPORT_FINISH_CONDITIONS",
+    "target":"パスポートを提示し、預け荷物の有無と座席の希望（窓側か通路側）を伝えよう！",
     "initial_message": "Next, please. May I see your passport and ticket?"
+  },
+  "restaurant": {
+    "title": "レストランの予約",
+    "description": "高級レストランで、アレルギーや席の希望を伝えて予約しよう。",
+    "background": "restaurant_background.jpg",
+    "icon": "🍽️",
+    "character": "hikari",
+    "prompt_key": "RESTAURANT_ROLEPLAY",
+    "finish_conditions":"RESTAURANT_FINISH_CONDITIONS",
+    "target": "日時・人数を伝え、さらに「ナッツアレルギーがある」または「窓際の席がいい」と伝えてみよう！",
+    "initial_message": "Good evening, 'Gemini Kitchen'. How can I help you today?"
   },
   "freetalk": {
     "title": "フリートーク",

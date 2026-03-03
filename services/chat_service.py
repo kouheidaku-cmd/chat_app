@@ -12,7 +12,7 @@ class ChatService:
         #モード選択により決定される部分
         self.mode="freetalk"
         self.chat_history=[]
-        self.fnish_conditions=None
+        self.finish_conditions=None
 
         #JSONファイルからの読み込み
         json_path=os.path.join("static","scenarios.json")
@@ -47,7 +47,8 @@ class ChatService:
         #各種設定の読み込み
         system_main=read_prompt_file(prompt_key)
         self.chat_history=[{"role":"system","content":system_main}]
-        self.fnish_conditions=read_prompt_file(finish_key)
+        self.chat_history.append({"role":"assistant","content":initial_message_text})
+        self.finish_conditions=read_prompt_file(finish_key)
 
         #必要なものをフロントエンドへ送る
         send_data={
@@ -67,23 +68,26 @@ class ChatService:
         # OpenAI用のプロンプト組み立て
         prompt=None
         if self.mode=="freetalk":
-            prompt = (
-                f"ユーザーからのメッセージ：{user_text}\n"
-                "会話の流れをスムーズにするため返答の生成はできるだけ早く行ってください。\n"
-                "また、話し言葉を想定し箇条書きなどは控えてください\n"
-                "以下のJSON形式で返答してください：\n"
-                "{ \"reply\": \"返答\", \"ai_emotion\": \"喜び/悲しみ/驚き/自然体/怒り/嫌悪/恐れ\" }\n" 
-                "注意点としてai_emotionには心配は含まれておりません"
-                    )
+            prompt =(
+                f"User Message: {user_text}\n"
+                "Note: The user input is provided via voice recognition. Please ignore any missing punctuation or minor transcription errors, and focus on understanding the user's intent from the context.\n"
+                "Please generate your response as quickly as possible to keep the conversation flow smooth.\n"
+                "Since this is a spoken conversation, do not use bullet points or formal lists.\n"
+                "You MUST respond ONLY in the following JSON format:\n"
+                '{{ "reply": "Your response", "ai_emotion": "喜び/悲しみ/驚き/自然体/怒り/嫌悪/恐れ" }}\n'
+                "Note: Do not use '心配' (worry) for ai_emotion. Choose only from the options provided."
+
+            )
         else:
-            prompt=(
-                f"ユーザーからのメッセージ：{user_text}\n"
-                "会話の流れをスムーズにするため返答の生成はできるだけ早く行ってください。\n"
-                "また、話し言葉を想定し箇条書きなどは控えてください\n"
-                "以下のJSON形式で返答してください：\n"
-                "{ \"reply\": \"返答\", \"ai_emotion\": \"喜び/悲しみ/驚き/自然体/怒り/嫌悪/恐れ\" }\n" 
-                "注意点としてai_emotionには心配は含まれておりません"
-                f"終了条件:{self.fnish_conditions}"
+            prompt=prompt = (
+                f"User message: {user_text}\n"
+                "Note: The user input is provided via voice recognition. Please ignore any missing punctuation or minor transcription errors, and focus on understanding the user's intent from the context.\n"
+                "To keep the conversation natural and smooth, please generate your response quickly.\n"
+                "This is a spoken conversation, so avoid using bullet points or lists.\n"
+                "You MUST respond ONLY in the following JSON format:\n"
+                '{{ "reply": "Your response here", "ai_emotion": "喜び/悲しみ/驚き/自然体/怒り/嫌悪/恐れ" }}\n'
+                "Note: Do not use '心配' (worry) for ai_emotion. Choose only from the provided list.\n"
+                f"Finish conditions for this scenario: {self.finish_conditions}"
             )
         current_messages = self.chat_history + [{"role": "user", "content": prompt}]
 
@@ -124,8 +128,12 @@ class ChatService:
     def get_hint(self):
         # ヒント生成用の短いプロンプトを作成
         hint_prompt = (
-            "これまでの会話の流れを踏まえて、role:userが次に言える短いフレーズを3つ提案してください。"
-            "1. [フレーズ] \n2. [フレーズ] ..."
+            "Based on the flow of the conversation so far, please suggest 3 short English phrases that the user (role:user) could say next.\n"
+            "Ensure the phrases are natural and helpful for completing the current scenario.\n"
+            "Format:\n"
+            "1. [Phrase]\n"
+            "2. [Phrase]\n"
+            "3. [Phrase]"
         )
         
         # 履歴を壊さないように、コピーしたメッセージにヒント用プロンプトを足して送る
@@ -138,6 +146,25 @@ class ChatService:
         
         return response.choices[0].message.content
     
+    def repeat(self):
+        num=len(self.chat_history)
+        index=num-1
+        
+        if index<0:#会話履歴がそもそもない場合
+            return None
+        
+        last_chat=self.chat_history[index]
+        while last_chat["role"]!="assistant":
+            if index>0:
+                index-=1
+                last_chat=self.chat_history[index]
+            else:
+                return None
+        
+        return last_chat["content"]
+
+
+
     def get_report(self):
         report_prompt=None
         if self.mode=="freetalk":
@@ -145,7 +172,7 @@ class ChatService:
             report_prompt = (
                 "role:userは言語の学習者です"
                 "role:userの対話相手はrole:assistantです"
-                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があればそれを日本語で指摘してください"
                 "userからのメッセージに返信する必要性はありません"
             )
         else:
@@ -154,7 +181,7 @@ class ChatService:
                 "role:userは言語の学習者です"
                 f"role:userとの対話相手であるrole:assistantは以下のようなプロンプトで設定されていました：{self.chat_history[0]}"
                 f"role:userとの会話の状態は最終的にこのような状態で終了しました。status:{self.status}  ただし各statusはそれぞれ以下の意味です。active:ユーザ側で会話が途中終了されました。　end_by_ai:ユーザが課題を解決しました　end_by_limit:ユーザは指定の回数以内の会話で課題を解決できませんでした"
-                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があれば指摘してください"
+                "これまでの会話の流れを踏まえて、role:userの文法的な間違いや改善点があればそれを日本語で指摘してください"
 
             )
             

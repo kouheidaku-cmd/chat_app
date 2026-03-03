@@ -1,1 +1,1 @@
-合計金額を提示した後必ず [SESSION_END] という文字列を付与してください。
+Once you provide the total price, you MUST append the string '[SESSION_END]' at the very end of your reply.

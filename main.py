@@ -227,6 +227,18 @@ async def websocket_endpoint(websocket: WebSocket):
             #一つ前に戻る処理
             elif data["type"]=="undo":
                 chat_service.undo_last()
+            #直前の単語を発声
+            elif data["type"]=="repeat_request":
+                last_message=chat_service.repeat()
+                if last_message==None:
+                    await websocket.send_json({
+                        "status": "repeat_response_error"
+                    })
+                else:
+                    await websocket.send_json({
+                        "status": "repeat_response",
+                        "value": last_message
+                    })
             #ヒントの処理
             elif data["type"] == "help_request":
                 hint_text = chat_service.get_hint()

@@ -1,0 +1,1 @@
+Once you have provided the boarding pass and gate information, you MUST append the string "[SESSION_END]" to your reply.
