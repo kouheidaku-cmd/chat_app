@@ -247,6 +247,7 @@ function undoLastMessage() {
     
     //AIの発話を止める（もし喋っている最中なら）
     window.speechSynthesis.cancel();
+    speak_frag=0;
     
     console.log("最後の一往復を削除しました");
 }
@@ -256,6 +257,7 @@ function forceFinish() {
     if (confirm("会話を終了して、これまでの内容でレポートを作成しますか？")) {
         // AIの音声を止める
         window.speechSynthesis.cancel();
+        speak_frag=0;
         
         // サーバーに「強制終了してレポートが欲しい」とリクエストを送る
         // typeは "request_feedback" としても良いですし、
